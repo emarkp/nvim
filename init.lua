@@ -870,12 +870,14 @@ require('lazy').setup({
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
+    checkout = 'main',
     main = 'nvim-treesitter.config', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
       ensure_installed = {
         'bash',
         'c',
+        'cpp',
         'diff',
         'html',
         'lua',
@@ -885,6 +887,7 @@ require('lazy').setup({
         'query',
         'vim',
         'vimdoc',
+        'python',
       },
       -- Autoinstall languages that are not installed
       auto_install = true,
