@@ -99,10 +99,6 @@ vim.o.confirm = true
 -- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
 -- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
--- Keybinds to make split navigation easier.
---  Use CTRL+<hjkl> to switch between windows
---
---  See `:help wincmd` for a list of all window commands
 vim.keymap.set('n', '<m-k>', '<C-w>W')
 vim.keymap.set('n', '<Leader>q', '<C-w>W')
 vim.keymap.set('n', '<m-j>', '<C-w>w')
@@ -802,6 +798,7 @@ require('lazy').setup({
         --
         -- See :h blink-cmp-config-keymap for defining your own keymap
         preset = 'default',
+        ['<tab>'] = { 'select_and_accept', 'fallback' },
 
         -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
@@ -1142,6 +1139,10 @@ vim.keymap.set('n', '<f4>', function()
   GetFileInOtherWindow()
 end, { desc = 'Open file in other window' })
 vim.g.windows = 0
+vim.keymap.set('n', '<m-k>', '<C-w>W')
+vim.keymap.set('n', '<Leader>q', '<C-w>W')
+vim.keymap.set('n', '<m-j>', '<C-w>w')
+vim.keymap.set('n', '<Leader>w', '<C-w>w')
+
 vim.g.singleInit = 1
--- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
