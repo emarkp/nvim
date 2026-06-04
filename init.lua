@@ -147,7 +147,7 @@ rtp:prepend(lazypath)
 --    :Lazy update
 --
 -- NOTE: Here is where you install your plugins.
-require('lazy').setup({
+require('lazy').setup {
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
 
@@ -364,7 +364,33 @@ require('lazy').setup({
       end, { desc = '[S]earch [N]eovim files' })
     end,
   },
+  -- opencode
+  {
+    'sudo-tee/opencode.nvim',
+    config = function()
+      require('opencode').setup {}
+    end,
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      {
+        'MeanderingProgrammer/render-markdown.nvim',
+        opts = {
+          anti_conceal = { enabled = false },
+          file_types = { 'markdown', 'opencode_output' },
+        },
+        ft = { 'markdown', 'Avante', 'copilot-chat', 'opencode_output' },
+      },
+      -- Optional, for file mentions and commands completion, pick only one
+      'saghen/blink.cmp',
+      -- 'hrsh7th/nvim-cmp',
 
+      -- Optional, for file mentions picker, pick only one
+      'folke/snacks.nvim',
+      -- 'nvim-telescope/telescope.nvim',
+      -- 'ibhagwan/fzf-lua',
+      -- 'nvim_mini/mini.nvim',
+    },
+  },
   -- LSP Plugins
   {
     -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
@@ -698,47 +724,6 @@ require('lazy').setup({
       vim.g.loaded_netrwPlugin = 1
     end,
   },
-  { -- Autoformat
-    'stevearc/conform.nvim',
-    event = { 'BufWritePre' },
-    cmd = { 'ConformInfo' },
-    keys = {
-      {
-        '<leader>f',
-        function()
-          require('conform').format { async = true, lsp_format = 'fallback' }
-        end,
-        mode = '',
-        desc = '[F]ormat buffer',
-      },
-    },
-    opts = {
-      notify_on_error = false,
-      format_on_save = function(bufnr)
-        -- Disable "format_on_save lsp_fallback" for languages that don't
-        -- have a well standardized coding style. You can add additional
-        -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
-        if disable_filetypes[vim.bo[bufnr].filetype] then
-          return nil
-        else
-          return {
-            timeout_ms = 500,
-            lsp_format = 'fallback',
-          }
-        end
-      end,
-      formatters_by_ft = {
-        lua = { 'stylua' },
-        -- Conform can also run multiple formatters sequentially
-        python = { 'isort', 'black' },
-        --
-        -- You can use 'stop_after_first' to run the first available formatter from the list
-        -- javascript = { "prettierd", "prettier", stop_after_first = true },
-      },
-    },
-  },
-
   { -- Autocompletion
     'saghen/blink.cmp',
     event = 'VimEnter',
@@ -920,94 +905,144 @@ require('lazy').setup({
       { 'ga', mode = { 'n', 'x' }, desc = 'EasyAlign' },
     },
   },
--- { -- Highlight, edit, and navigate code
---   'nvim-treesitter/nvim-treesitter',
---   build = ':TSUpdate',
---   checkout = 'main',
---   main = 'nvim-treesitter.config', -- Sets main module to use for opts
---   -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
---   opts = {
---     ensure_installed = {
---       'bash',
---       'c',
---       'cpp',
---       'diff',
---       'html',
---       'lua',
---       'luadoc',
---       'markdown',
---       'markdown_inline',
---       'query',
---       'vim',
---       'vimdoc',
---       'python',
---     },
---     -- Autoinstall languages that are not installed
---     auto_install = true,
---     highlight = {
---       enable = true,
---       -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
---       --  If you are experiencing weird indenting issues, add the language to
---       --  the list of additional_vim_regex_highlighting and disabled languages for indent.
---       additional_vim_regex_highlighting = { 'ruby' },
---     },
---     indent = { enable = true, disable = { 'ruby' } },
---   },
-    -- There are additional nvim-treesitter modules that you can use to interact
-    -- with nvim-treesitter. You should go explore a few and see what interests you:
-    --
-    --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
-    --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
-    --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
---  },
+  {
+    'dmtrKovalenko/fff.nvim',
+    build = function()
+      -- downloads a prebuilt binary or falls back to cargo build
+      require("fff.download").download_or_build_binary()
+    end,
+    -- for nixos:
+    -- build = "nix run .#release",
+    opts = {
+      debug = {
+        enabled = true,
+        show_scores = true,
+      },
+    },
+    lazy = false, -- the plugin lazy-initialises itself
+    keys = {
+      { "ff", function() require('fff').find_files() end, desc = 'FFFind files' },
+      { "fg", function() require('fff').live_grep() end, desc = 'LiFFFe grep' },
+      { "fz", function() require('fff').live_grep({ grep = { modes = { 'fuzzy', 'plain' } } }) end, desc = 'Live fffuzy grep', },
+      { "fc", function() require('fff').live_grep({ query = vim.fn.expand("<cword>") }) end, desc = 'Search current word', },
+    }
+  },
+  -- opencode
+  {
+    'sudo-tee/opencode.nvim',
+    config = function()
+      require('opencode').setup {}
+    end,
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      {
+        'MeanderingProgrammer/render-markdown.nvim',
+        opts = {
+          anti_conceal = { enabled = false },
+          file_types = { 'markdown', 'opencode_output' },
+        },
+        ft = { 'markdown', 'Avante', 'copilot-chat', 'opencode_output' },
+      },
+      -- Optional, for file mentions and commands completion, pick only one
+      'saghen/blink.cmp',
+      -- 'hrsh7th/nvim-cmp',
 
-  -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
-  -- init.lua. If you want these files, they are in the repository, so you can just download them and
-  -- place them in the correct locations.
-
-  -- NOTE: Next step on your Neovim journey: Add/Configure additional plugins for Kickstart
-  --
-  --  Here are some example plugins that I've included in the Kickstart repository.
-  --  Uncomment any of the lines below to enable them (you will need to restart nvim).
-  --
-  -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
-
-  -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
-  --    This is the easiest way to modularize your config.
-  --
-  --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
-  --
-  -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
-  -- Or use telescope!
-  -- In normal mode type `<space>sh` then write `lazy.nvim-plugin`
-  -- you can continue same window with `<space>sr` which resumes last telescope search
-}, {
-  ui = {
-    -- If you are using a Nerd Font: set icons to an empty table which will use the
-    -- default lazy.nvim defined Nerd Font icons, otherwise define a unicode icons table
-    icons = vim.g.have_nerd_font and {} or {
-      cmd = '⌘',
-      config = '🛠',
-      event = '📅',
-      ft = '📂',
-      init = '⚙',
-      keys = '🗝',
-      plugin = '🔌',
-      runtime = '💻',
-      require = '🌙',
-      source = '📄',
-      start = '🚀',
-      task = '📌',
-      lazy = '💤 ',
+      -- Optional, for file mentions picker, pick only one
+      'folke/snacks.nvim',
+      -- 'nvim-telescope/telescope.nvim',
+      -- 'ibhagwan/fzf-lua',
+      -- 'nvim_mini/mini.nvim',
     },
   },
-})
+  -- { -- Highlight, edit, and navigate code
+  --   'nvim-treesitter/nvim-treesitter',
+  --   build = ':TSUpdate',
+  --   checkout = 'main',
+  --   main = 'nvim-treesitter.config', -- Sets main module to use for opts
+  --   -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
+  --   opts = {
+  --     ensure_installed = {
+  --       'bash',
+  --       'c',
+  --       'cpp',
+  --       'diff',
+  --       'html',
+  --       'lua',
+  --       'luadoc',
+  --       'markdown',
+  --       'markdown_inline',
+  --       'query',
+  --       'vim',
+  --       'vimdoc',
+  --       'python',
+  --     },
+  --     -- Autoinstall languages that are not installed
+  --     auto_install = true,
+  --     highlight = {
+  --       enable = true,
+  --       -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
+  --       --  If you are experiencing weird indenting issues, add the language to
+  --       --  the list of additional_vim_regex_highlighting and disabled languages for indent.
+  --       additional_vim_regex_highlighting = { 'ruby' },
+  --     },
+  --     indent = { enable = true, disable = { 'ruby' } },
+  --   },
+  -- There are additional nvim-treesitter modules that you can use to interact
+  -- with nvim-treesitter. You should go explore a few and see what interests you:
+  --
+  --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
+  --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
+  --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+}
+
+-- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
+-- init.lua. If you want these files, they are in the repository, so you can just download them and
+-- place them in the correct locations.
+
+-- NOTE: Next step on your Neovim journey: Add/Configure additional plugins for Kickstart
+--
+--  Here are some example plugins that I've included in the Kickstart repository.
+--  Uncomment any of the lines below to enable them (you will need to restart nvim).
+--
+-- require 'kickstart.plugins.debug',
+-- require 'kickstart.plugins.indent_line',
+-- require 'kickstart.plugins.lint',
+-- require 'kickstart.plugins.autopairs',
+-- require 'kickstart.plugins.neo-tree',
+-- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+
+-- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
+--    This is the easiest way to modularize your config.
+--
+--  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
+-- { import = 'custom.plugins' },
+--
+-- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
+-- Or use telescope!
+-- In normal mode type `<space>sh` then write `lazy.nvim-plugin`
+-- you can continue same window with `<space>sr` which resumes last telescope search
+-- {
+--   ui = {
+--     -- If you are using a Nerd Font: set icons to an empty table which will use the
+--     -- default lazy.nvim defined Nerd Font icons, otherwise define a unicode icons table
+--     icons = vim.g.have_nerd_font and {} or {
+--       cmd = '⌘',
+--       config = '🛠',
+--       event = '📅',
+--       ft = '📂',
+--       init = '⚙',
+--       keys = '🗝',
+--       plugin = '🔌',
+--       runtime = '💻',
+--       require = '🌙',
+--       source = '📄',
+--       start = '🚀',
+--       task = '📌',
+--       lazy = '💤 ',
+--     },
+--   },
+-- }
+
 --vim.keymap.set("n", "<Leader>cd", ":call ConditionalCD(0)<CR><C-L>:<BS>")
 --vim.keymap.set("n", "<F5>", "<Leader>cd")
 vim.keymap.set('n', '<S-F5>', ':cd ~/<CR>')
@@ -1151,5 +1186,6 @@ vim.keymap.set('n', '<Leader>q', '<C-w>W')
 vim.keymap.set('n', '<m-j>', '<C-w>w')
 vim.keymap.set('n', '<Leader>w', '<C-w>w')
 
+vim.g.autoformat = false
 vim.g.singleInit = 1
 -- vim: ts=2 sts=2 sw=2 et
